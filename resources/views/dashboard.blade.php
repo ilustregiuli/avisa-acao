@@ -11,6 +11,12 @@
                 
                 {{-- O seu componente Livewire deve ser incluído aqui --}}
                 <livewire:create-alert />
+
+                {{-- NOVO: Separador e Listagem --}}
+                <x-section-border /> 
+
+                <div class="p-6 sm:px-20 bg-white">
+                    <livewire:list-alerts />
                 
             </div>
         </div>

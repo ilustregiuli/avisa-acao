@@ -31,6 +31,8 @@ class CreateAlert extends Component
         $this->reset();
 
         session()->flash('success', 'Alerta criado com sucesso!');
+        // Atualiza a página com o novo alerta cadastrado
+        $this->dispatch('alert-saved'); 
     }
 
     public function render()
