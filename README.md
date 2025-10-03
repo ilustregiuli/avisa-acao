@@ -1,27 +1,44 @@
-## Documentação: História de Usuário 1
+## 📄 Documentação do Projeto: Avisa Ação (MVP)
 
-Nome da História
+Este documento detalha o que foi construído durante a implementação das Histórias de Usuário iniciais, focando na base de autenticação e no sistema de cadastro e listagem de alertas.
 
-Cadastro e Configuração de Alertas
+### 🛠️ Tecnologias Utilizadas
 
-Objetivo (Conforme Especificado)
+| Tecnologia | Finalidade |
+| :--- | :--- |
+| **Laravel 10+** | Framework PHP base para toda a aplicação. |
+| **Laravel Jetstream** | Autenticação, Login, Registro e Layout do Dashboard (Frontend Kit). |
+| **Livewire** | Desenvolvimento reativo e dinâmico dos componentes de UI (`CreateAlert`, `ListAlerts`). |
+| **Tailwind CSS** | Estilização (design) do frontend. |
+| **SQLite** | Banco de dados local para desenvolvimento. |
 
-Como investidor, eu quero me cadastrar na plataforma e configurar um alerta para uma ação específica, definindo o range de preço que me interessa, para que eu não perca a oportunidade de negociar.
+---
 
-## Escopo / Funcionalidade Entregue
-<img width="680" height="403" alt="Image" src="https://github.com/user-attachments/assets/e3f90bc8-3d4d-4382-a4a7-3f9ee6a42e16" />
+## 🎯 História de Usuário 1: Cadastro e Configuração de Alertas
 
-## Instruções Chave para o Desenvolvimento
+**Objetivo:** Permitir que o usuário se cadastre e configure um alerta de preço.
 
-Esta funcionalidade reside principalmente em dois locais:
+### Detalhes da Implementação
 
-    Modelo App\Models\User.php: 
-        Contém a relação public function alerts() { return $this->hasMany(Alert::class); }.
-        
-    Componente App\Livewire\CreateAlert.php:
-        Propriedades: $stock_symbol, $min_price, $max_price.
+| Recurso | Descrição | Arquivos Chave |
+| :--- | :--- | :--- |
+| **Estrutura** | Criação do **Modelo `Alert`** e da tabela `alerts` no banco de dados. | `app/Models/Alert.php`<br>`database/migrations/*_create_alerts_table.php` |
+| **Relações** | Definida a relação **`hasMany`** no `User` e **`belongsTo`** no `Alert` para garantir que cada alerta esteja vinculado a um usuário. | `app/Models/User.php` |
+| **Formulário** | Componente Livewire para criação de novos alertas, implementado com **Jetstream/Tailwind** para design. | `app/Livewire/CreateAlert.php`<br>`resources/views/livewire/create-alert.blade.php` |
+| **Validação** | Regras de validação do Laravel (ex: `required`, `numeric`), com destaque para a regra **`gt:min_price`** para garantir que o preço máximo seja maior que o mínimo. | `app/Livewire/CreateAlert.php` |
 
-    Método save(): Utiliza auth()->user()->alerts()->create([...]) para salvar os dados com segurança e
-        dispara o evento ($this->dispatch('alert-saved')) para atualizar o estado da sessão e mostrar a mensagem de sucesso.
-        
-    Validação Crítica: max_price' => 'required|numeric|gt:min_price'.
+---
+
+## 📊 História de Usuário 2: Visualização e Gestão de Alertas
+
+**Objetivo:** Permitir que o usuário visualize e exclua seus alertas ativos no painel.
+
+### Detalhes da Implementação
+
+| Recurso | Descrição | Arquivos Chave |
+| :--- | :--- | :--- |
+| **Listagem** | Criação do componente **Livewire `ListAlerts`** para buscar e exibir os dados. | `app/Livewire/ListAlerts.php`<br>`resources/views/livewire/list-alerts.blade.php` |
+| **Busca** | Uso do `auth()->user()->alerts()` no método `render()` para garantir o escopo de dados apenas para o usuário logado. | `app/Livewire/ListAlerts.php` |
+| **Paginação** | Implementação da paginação via *trait* `Livewire\WithPagination` para performance (`10 itens/página`). | `app/Livewire/ListAlerts.php` |
+| **Exclusão** | Método **`deleteAlert($id)`** com verificação de propriedade para segurança. O botão usa a diretiva `wire:confirm`. | `app/Livewire/ListAlerts.php` |
+| **Comunicação** | Uso de **Eventos Livewire (`alertSaved`)** para garantir a atualização imediata da lista (`ListAlerts` usa `$listeners = ['alertSaved' => '$refresh']`) após a criação de um alerta em `CreateAlert`. | `app/Livewire/CreateAlert.php`<br>`app/Livewire/ListAlerts.php` |
