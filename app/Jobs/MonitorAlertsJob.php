@@ -24,7 +24,20 @@ class MonitorAlertsJob implements ShouldQueue
      */
     public function handle(): void
     {
-        $alerts = Alert::all();
+        // LOG INICIAL: Confirma que o Job começou (sempre aparece, mesmo vazio)
+        Log::info('🔵 MonitorAlertsJob INICIADO: Verificando alertas...');
+
+        $alerts = Alert::all();  // Pega todos (pode ser vazio)
+        // LOG PARA BANCO VAZIO: Trata o caso sem dados
+        if ($alerts->isEmpty()) {
+              Log::info('🟡 MonitorAlertsJob: NENHUMA ALERTA ENCONTRADA no banco. Nada a processar.');
+              Log::info('🔵 MonitorAlertsJob FINALIZADO: Execução OK (sem dados).');
+              return;  // Sai cedo, sem erro
+          }
+
+        // LOG ANTES DO LOOP: Confirma que há dados
+        Log::info('🟢 MonitorAlertsJob: Encontrados ' . $alerts->count() . ' alertas para processar.');
+  
         foreach ($alerts as $alert) {
 
             // A simulação de preço rand() é feita diretamente aqui.
@@ -34,6 +47,9 @@ class MonitorAlertsJob implements ShouldQueue
             $minPrice = $alert->min_price;
             $maxPrice = $alert->max_price;
             
+            // LOGS DENTRO DO LOOP: Para cada alerta
+            Log::info("📊 Processando alerta para {$alert->stock_symbol}: Mín R$ {$minPrice}, Máx R$ {$maxPrice}");
+              
             // Disparar SE estiver DENTRO do range
             if ($currentPrice >= $minPrice && $currentPrice <= $maxPrice) {
                 Log::alert(
@@ -48,7 +64,11 @@ class MonitorAlertsJob implements ShouldQueue
                         "Preço Atual: R$ {$currentPrice}. ".
                         "RANGE: R$ {$minPrice} a R$ {$maxPrice}."
                 );
-            }
+            } 
         }
+
+        // LOG FINAL: Sempre aparece se chegou aqui
+        Log::info('🔵 MonitorAlertsJob FINALIZADO: Todos os alertas processados com sucesso.');
+
     }
 }
